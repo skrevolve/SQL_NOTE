@@ -1,12 +1,38 @@
-# mysql_errors
+# mysql
 
-## persistant global connection vs connection pool
+# 1. persistant global connection vs connection pool
 둘중 어떤 전략이 나은 판단인가? 
 하나의 연결로 이루어진 지속연결인지 커넥션 풀을 이용한 트래픽 리소스 최적화인지.? 
-아직 모르겠다
+## 1.1 DB connection Pool을 지양하는 이유
+보통 Connection Pool을 사용하는 이유에는 Connection에 드는 비용이 크기 때문이라고 한다  
+애플리케이션에서 매쿼리마다 connection을 생성하고 종료한다면 어떤 것에 비용적으로 비효율적인지 알아보자
 
-# 1. 자주 볼수 있는 에러
-## 1.1. Too many Connections
+## 1.1.1 네트워크
+DBMS 와의 통신은 TCP/IP로 이루어지는데 3-way-handshake 과정을 거치고  
+가상경로의 연결은 지속 유지되며 연결을 끊는 과정에서 다시 4-way-handshake 를 거친다.  
+이러한 연결 과정을 매번 반복하지 않을수 있는데 반복한다는건 비효율적인 일이다.
+
+## 1.1.2. 오라클 DBMS
+오라클과 클라이언트의 연결과정
+1. 오라클 리스너 시작 (LISTEN)
+2. 애플리케이션에서의 커넥션 시도 
+- 리스너와 클라이언트 사이에 소켓 생성
+3. 서버 프로세스의 생성
+- 서버 프로세스를 생성하여 SQL 처리를 즉시 인계
+- 리스너가 인계한 후부터 서버 프로세스와 오라클 클라이언트는 직접 송수신 하므로 리스너는 자유로워 진다
+- 애플리케이션에서 접속을 종료하는 처리(close, disconnect)를 수행하면 서버 프로세스도 함께 종료된다  
+
+오라클의 경우 연결마다 매번 서버 Process를 실제로 OS단에 생성해야 한다   
+이는 공유 메모리 확보등 무거운 작업이다. 이 과정을 반복하는것은 엄청난 비효율이다  
+오라클은 하나의 쿼리마다 하나의 Process가 생기게 되어 부담이 크다  
+
+## 1.1.3. MySQL DBMS
+MySQL은 단일 프로세스, 멀티 스레드 개념이다  
+오라클과 달리 클라이언트를 담당할 Process가 아닌 Thread가 존재한다.  
+
+
+# 2. 자주 볼수 있는 에러
+## 2.1. Too many Connections
 
 ```sql
 show variables like "%max_connections%";
@@ -50,7 +76,7 @@ Connection Usage(%) = Threads_connected / max_connections x 100
 - Connection Usage 가 100% 이거나 높다면 max_connections 수를 증가시키는 것을 권장
 - connection 수가 부족할 경우 Too many connections 에러가 발생한다
 
-### 1.1.1 해결방안
+### 2.1.1 해결방안
 1. max_connections 변경
 - mysql.conf 파일의 내용에서 해당 옵션을 적당한 값으로 늘려서 변경한다
 2. wait_timeout 변경
@@ -69,7 +95,7 @@ select * from information_schema.processlist where command != 'sleep';
 ```
 해당 사항을 체크후 변경한 후에 processlist 를 확인한다
 
-## 1.2. Error: Host 'xxx.xx.x.x' is blocked because of many connection errors; unblock with 'mysqladmin flush-hosts'
+## 2.2. Error: Host 'xxx.xx.x.x' is blocked because of many connection errors; unblock with 'mysqladmin flush-hosts'
 
 시스템은 멀쩡한데 느닷없이 mysql 서버로부터 접속 거부를 당한다. 이 에러의 max_connect_errors와 연관성이 높다.  
 MySQL 서버가 동작중인지 원격에서 검사하거나 해당 원격 서버의 포트가 살아있는지 검사할때 단순히 커넥션을 한후 close 하게 되면  
@@ -83,7 +109,7 @@ MySQL은 비정상적인 접속에 대한 요청수를 카운트 하는데 max_c
 기본값은 10이며 정기적인 포트 점검이 필요한 경우 이수를 높이라고 권장한다.  
 MySQL 메뉴얼에 따르면 아래와 같이 권장한다. 
 
-### 1.2.1 MySQL Manual
+### 2.2.1 MySQL Manual
 
 - MySQL의 안정성은 DNS의 안정성에 달려있다. 즉, DNS의 설정 상태가 좋지 않을 경우에는 MySQL 서버도 그만큼 안정하지 못하게 된다. 
 - 만일 네트워크가 안정하지 못할 경우, max_connect_errors가 빠른 시간안에 10(default value)에 도달하게 되고 동일 클라이언트의 향후 커넥션을 거부하게 된다.  
