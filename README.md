@@ -1,16 +1,16 @@
 # 1. persistant global connection vs connection pool
 둘중 어떤 전략이 나은 판단인가? 
 하나의 연결로 이루어진 지속연결인지 커넥션 풀을 이용한 트래픽 리소스 최적화인지.? 
-## 1.1 DB connection Pool을 지양하는 이유
+## 1.1 DB connection Pool 을 지양하는 이유
 보통 Connection Pool을 사용하는 이유에는 Connection에 드는 비용이 크기 때문이라고 한다  
 애플리케이션에서 매쿼리마다 connection을 생성하고 종료한다면 어떤 것에 비용적으로 비효율적인지 알아보자
 
-## 1.1.1 네트워크
+## 1.1.1 Network
 DBMS 와의 통신은 TCP/IP로 이루어지는데 3-way-handshake 과정을 거치고  
 가상경로의 연결은 지속 유지되며 연결을 끊는 과정에서 다시 4-way-handshake 를 거친다.  
 이러한 연결 과정을 매번 반복하지 않을수 있는데 반복한다는건 비효율적인 일이다.
 
-## 1.1.2. 오라클 DBMS
+## 1.1.2. Oracle DBMS
 오라클과 클라이언트의 연결과정
 1. 오라클 리스너 시작 (LISTEN)
 2. 애플리케이션에서의 커넥션 시도 
