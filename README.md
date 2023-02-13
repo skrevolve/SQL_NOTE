@@ -8,13 +8,13 @@
 # 1. 자주 볼수 있는 에러
 ## 1.1. Too many Connections
 
-```sh
+```sql
 show variables like "%max_connections%";
 ```
 ![image](https://user-images.githubusercontent.com/41939976/218401943-6e4ff942-64b2-4699-9950-94a929710ecc.png)
 - max_connections : 최대 접속수 (기본값 151)
 
-```sh
+```sql
 show status like "%connect%";
 ```
 ![image](https://user-images.githubusercontent.com/41939976/218405817-4ae100a4-dfa0-4b3d-8d67-f03cae92fe0a.png)
@@ -23,7 +23,7 @@ show status like "%connect%";
 - Max_used_connections: 최대로 동시에 접속한 수
 - Threads_connected: Thread Cache의 Thread 수
 
-```sh
+```sql
 show status like '%thread%';
 ```
 ![image](https://user-images.githubusercontent.com/41939976/218406185-24f2544f-8ff2-4f15-b9ad-9c12b1b30b19.png)
@@ -63,9 +63,9 @@ Connection Usage(%) = Threads_connected / max_connections x 100
 - interactive_timeout은 터미널 모드 에서의 다음 쿼리까지 기다리는 최대 시간이다. (wait_timeout 과 비슷)
 - 이것도 또한 wait_timout 과 동일하게 기본값이 28800초 이므로 3600초로 하는것을 권장
 
-```sh
+```sql
 show processlist;
-SELECT * FROM information_schema.processlist WHERE command != 'sleep';
+select * from information_schema.processlist where command != 'sleep';
 ```
 해당 사항을 체크후 변경한 후에 processlist 를 확인한다
 
