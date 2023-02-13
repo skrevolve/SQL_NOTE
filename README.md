@@ -70,8 +70,28 @@ select * from information_schema.processlist where command != 'sleep';
 해당 사항을 체크후 변경한 후에 processlist 를 확인한다
 
 ## 1.2. Error: Host 'xxx.xx.x.x' is blocked because of many connection errors; unblock with 'mysqladmin flush-hosts'
->
-  asdf
 
+시스템은 멀쩡한데 느닷없이 mysql 서버로부터 접속 거부를 당한다. 이 에러의 max_connect_errors와 연관성이 높다.  
+MySQL 서버가 동작중인지 원격에서 검사하거나 해당 원격 서버의 포트가 살아있는지 검사할때 단순히 커넥션을 한후 close 하게 되면  
+MySQL은 비정상적인 접속으로 판단하여 해당 IP를 블럭킹한다고 한다.  
+필자의 경우 서비스 요청 마다 단일 커넥션을 한후 쿼리를 끝낸후에 커넥션을 끊었더니 언제부턴가 갑자기 서버에서 mysql 원격지로 부터 ip를 차단당하는 일이 발생했다.  
+따라서 나의 경우 아예 단일 커넥션의 현상을 줄이기 위해 코드적으로 전역적으로 단일 연결을 해서 문제를 해결했다.  
+하지만 단일 연결에서의 문제가 있다면 8시간이상(wait_timeout 기본값) 요청이 없을 경우 스스로 연결이 해제되어 reconnect 가 불가능했다.  
+해당 문제가 있던 서버는 API 서버이고 트래픽이 많은 편이라 장애가 될만한 부분은 아니었다.   
 
-## 비동기요청 관련 에러
+MySQL은 비정상적인 접속에 대한 요청수를 카운트 하는데 max_connect_errors 변수에서 지정한 값을 넘으면 블럭킹한다.  
+기본값은 10이며 정기적인 포트 점검이 필요한 경우 이수를 높이라고 권장한다.  
+MySQL 메뉴얼에 따르면 아래와 같이 권장한다. 
+
+### 1.2.1 MySQL Manual
+
+- MySQL의 안정성은 DNS의 안정성에 달려있다. 즉, DNS의 설정 상태가 좋지 않을 경우에는 MySQL 서버도 그만큼 안정하지 못하게 된다. 
+- 만일 네트워크가 안정하지 못할 경우, max_connect_errors가 빠른 시간안에 10(default value)에 도달하게 되고 동일 클라이언트의 향후 커넥션을 거부하게 된다.  
+
+따라서 이러한 문제를 해결 하기 위한 방법을 아래와 같이 제안한다.  
+1. 절대로 외부에서 MySQL 서버에 커넥션을 하도록 만들지 말 것
+2. MySQL 에서 libwrap를 지원하도록 활성화 시키지 말 것. 이것을 활성화 시키는 것은 단지 문제를 더 어렵게 하는 것이다.
+3. 사용자의 my.cnf 파일에서 skip_name_resolve를 활성화 시킬 것. 이렇게 하면 모든 호스트 이름에서 점(period)를 비활성화(disable) 시킨다.  
+- 모든 ALL GRANT는 반드시 IP주소를 기반으로 되어 있어야 한다.
+4. max_connect_errors를 매우 높게 설정한다 (ex value: 99999999)
+- 이렇게 하면 네트워크 또는 클라이언트의 문제로 인한 우발적인 커넥션 단절 문제를 피할 수가 있다.
