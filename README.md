@@ -170,3 +170,4 @@ MySQL 메뉴얼에 따르면 아래와 같이 권장한다.
 * [멀티코어 프로그래밍에서 흔히 발생하는 문제 1부](https://andromedarabbit.net/멀티코어-프로그래밍에서-흔히-발생하는-문제-1부/)
 * [내가 만든 서비스는 얼마나 많은 사용자가 이용할 수 있을까?](https://hyuntaeknote.tistory.com/12)
 * [MySQL 8.0 Reference Manual > 5.6.3.4 Thread Pool Tuning](https://dev.mysql.com/doc/refman/8.0/en/thread-pool-tuning.html)
+* [mysql persistent connection vs connection pooling](https://stackoverflow.com/questions/9736188/mysql-persistent-connection-vs-connection-pooling)
