@@ -144,11 +144,11 @@ select * from information_schema.processlist where command != 'sleep';
 
 ## 2.2. Error: Host 'xxx.xx.x.x' is blocked because of many connection errors; unblock with 'mysqladmin flush-hosts'
 
-시스템은 멀쩡한데 느닷없이 mysql 서버로부터 접속 거부를 당한다. 이 에러의 max_connect_errors와 연관성이 높다.  
+간혹 시스템은 멀쩡한데 느닷없이 mysql 서버로부터 접속 거부를 당하는 경우가있는데, 이 에러는 max_connect_errors와 연관성이 높다.  
 MySQL 서버가 동작중인지 원격에서 검사하거나 해당 원격 서버의 포트가 살아있는지 검사할때 단순히 커넥션을 한후 close 하게 되면  
 MySQL은 비정상적인 접속으로 판단하여 해당 IP를 블럭킹한다고 한다.  
-필자의 경우 서비스 요청 마다 단일 커넥션을 한후 쿼리를 끝낸후에 커넥션을 끊었더니 언제부턴가 갑자기 서버에서 mysql 원격지로 부터 ip를 차단당하는 일이 발생했다.  
-따라서 나의 경우 아예 단일 커넥션의 현상을 줄이기 위해 코드적으로 전역적으로 단일 연결을 해서 문제를 해결했다.  
+필자의 경우 서비스 요청 마다 단일 커넥션을 한후 쿼리를 끝낸후에 커넥션을 끊었더니 언제부턴가 갑자기 서버에서 mysql 원격지로 부터 API 서버의 ip가 차단당하는 일이 발생했다.  
+따라서 아예 다중 커넥션의 현상을 줄이기 위해 코드적으로 전역 변수로 단일 연결하여 문제를 해결했다.  
 하지만 단일 연결에서의 문제가 있다면 8시간이상(wait_timeout 기본값) 요청이 없을 경우 스스로 연결이 해제되어 reconnect 가 불가능했다.  
 해당 문제가 있던 서버는 API 서버이고 트래픽이 많은 편이라 장애가 될만한 부분은 아니었다.   
 
