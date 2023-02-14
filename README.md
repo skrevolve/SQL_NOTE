@@ -51,7 +51,7 @@ Process가 종료되지 않고 계속 실행되며 Background Thread는 Main Thr
 - 모든 Connection을 사용하는 경우 새 연결이 만들어지고 pool에 추가된다
 - 데이터베이스에 대한 연결을 설정하기 위해 사용자가 기다려야 하는 시간을 줄여주는데 thread_cache_size와 개념이 비슷하다  
 
-#### ※주의사항
+#### ※ 주의사항
 - pool에 최대로 저장되는 connection 수는 정해져 있고 요청이 많은 경우 connection이 모두 사용중이라면 반납될때까지 대기를 한다
 - connection 수가 적으면 안되지만 많이 늘리게 되면 메모리를 많이 사용하게 되어 성능을 저하 시킬수 있다
 - 이용자 수에 따라 connection 수를 적절하게 지정해야 한다
@@ -70,11 +70,13 @@ Process가 종료되지 않고 계속 실행되며 Background Thread는 Main Thr
 
 ## 1.1.3 Application (Nodejs)
 Nodesjs 에서 애플리케이션 시작시 Connection 을 5개 생성하여 Connection Pool을 구성한다고 가정할 경우  
+'''
 1. 애플리케이션이 시작되고 5개의 Connection 생성
 2. 각 Connection은 TCP/IP 3-way-handshake 과정을 거치고 Nodejs의 Socket은 각각 서로 다른 고유한 포트번호에 할당된다
 3. 연결은 유지되며 즉 5개의 서로 다른 Socket이 열려있다
 4. 이후 이미 형성된 Connection(Socekt) 을 Pool의 Queue 에서 재사용된다
-
+'''  
+  
 # 2. 흔히 접할만한 Mysql 에러들과 해결법
 
 ## 2.1. Error: Too many Connections
