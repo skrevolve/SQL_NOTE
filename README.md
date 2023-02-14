@@ -1,6 +1,7 @@
 # 1. persistent global connection vs connection pool
 둘중 어떤 전략이 나은 판단인가? 
-하나의 연결로 이루어진 지속연결인지 커넥션 풀을 이용한 트래픽 리소스 최적화인지.? 
+하나의 연결로 이루어진 지속연결인지 커넥션 풀을 이용한 트래픽 리소스 최적화인지.?  
+  
 ## 1.1 DB connection Pool 을 지양하는 이유
 보통 Connection Pool을 사용하는 이유에는 Connection에 드는 비용이 크기 때문이라고 한다  
 애플리케이션에서 매쿼리마다 connection을 생성하고 종료한다면 어떤 것에 비용적으로 비효율적인지 알아보자
@@ -12,6 +13,7 @@ DBMS 와의 통신은 TCP/IP로 이루어지는데 3-way-handshake 과정을 거
 
 ## 1.1.2. Oracle DBMS
 오라클과 클라이언트의 연결과정
+```
 1. 오라클 리스너 시작 (LISTEN)
 2. 애플리케이션에서의 커넥션 시도 
 - 리스너와 클라이언트 사이에 소켓 생성
@@ -19,26 +21,28 @@ DBMS 와의 통신은 TCP/IP로 이루어지는데 3-way-handshake 과정을 거
 - 서버 프로세스를 생성하여 SQL 처리를 즉시 인계
 - 리스너가 인계한 후부터 서버 프로세스와 오라클 클라이언트는 직접 송수신 하므로 리스너는 자유로워 진다
 - 애플리케이션에서 접속을 종료하는 처리(close, disconnect)를 수행하면 서버 프로세스도 함께 종료된다  
-
-오라클의 경우 연결마다 매번 서버 Process를 실제로 OS단에 생성해야 한다   
-이는 공유 메모리 확보등 무거운 작업이다. 이 과정을 반복하는것은 엄청난 비효율이다  
-오라클은 하나의 쿼리마다 하나의 Process가 생기게 되어 부담이 크다  
+```
+- 오라클의 경우 연결마다 매번 서버 Process를 실제로 OS단에 생성해야 한다   
+- 이는 공유 메모리 확보등 무거운 작업이다. 이 과정을 반복하는것은 엄청난 비효율이다  
+- 오라클은 하나의 쿼리마다 하나의 Process가 생기게 되어 부담이 크다  
 
 ## 1.1.3. MySQL DBMS
-MySQL은 단일 프로세스, 멀티 스레드 개념이다  
+  
+MySQL은 단일 프로세스, 멀티 스레드 개념이다.  
 오라클과 달리 클라이언트를 담당할 Process가 아닌 Thread가 존재한다.  
 MySQL 서버로 요청이 들어올때 마다 배정되는 Foregorund Thread 도 있고 계속 돌고 있는 Background Thread 도 있다.  
-갑자기 요청이 천개가 들어왔다고 가정 하에 Thread 가 그 수만큼 늘어나게 되면 Context Swtiching 관련 리소스가 커져서 시스템 성능이 저하된다.  
+갑자기 요청이 천개가 들어왔다고 가정 하에 Thread 가 그 수만큼 늘어나게 되면  
+Context Swtiching 관련 리소스가 커져서 시스템 성능이 저하된다.  
 따라서 Multi Thread 프로그램들은  Thread Pool을 이용해서 Thread의 수를 제한한다.  
 
-1. Foreground Thread  
-Background Thread 와는 다르게 기본적인 차이점은 Foregroun Thread 는 메인 Thread가 종료 되더라도 Foreground Thread 가 살아 있는 한  
-Process 가 종료되지 않고 계속 실행되며 Background Thread 는 Main Thread 가 종료되면 바로  Process 를 종료한다  
-- 이 Thread 는 사용자가 요청한 쿼리문장을 처리하는 역할을 한다
-- 이러한 Thread 도 매 연결마다 생성하면 부담이 크므로 Tread Pool 개념을 사용한다
+>#### 1. Foreground Thread  
+Background Thread 와는 다르게 기본적인 차이점은 Foregroun Thread는 메인 Thread가 종료 되더라도 Foreground Thread가 살아 있는 한  
+Process가 종료되지 않고 계속 실행되며 Background Thread는 Main Thread가 종료되면 바로  Process를 종료한다.  
+- 이 Thread는 사용자가 요청한 쿼리문장을 처리하는 역할을 한다
+- 이러한 Thread도 매 연결마다 생성하면 부담이 크므로 Tread Pool 개념을 사용한다
 - 실제 동시접속이 늘었을때 Thread 생성으로 인해 지연이 발생할수 있다
 
-2. Connection Pool  
+>#### 2. Connection Pool  
 ![image](https://user-images.githubusercontent.com/41939976/218619108-c5ffd9ef-6e15-4a01-ba94-10c28c9ee693.png)
 - 소프트웨어 엔지니어링에서 Connection Pool은 데이터베이스에 대한 향후 요청이 필요할때 연결을 재사용할 수 있도록 유지관리하는 데이터베이스 연결의 캐시다
 - Connection Pool은 데이터베이스에서 명령을 실행하는 성능을 향상시키는데 사용된다
@@ -47,13 +51,13 @@ Process 가 종료되지 않고 계속 실행되며 Background Thread 는 Main T
 - 모든 Connection을 사용하는 경우 새 연결이 만들어지고 pool에 추가된다
 - 데이터베이스에 대한 연결을 설정하기 위해 사용자가 기다려야 하는 시간을 줄여주는데 thread_cache_size와 개념이 비슷하다  
 
-2.1. 주의사항
+#### ※주의사항
 - pool에 최대로 저장되는 connection 수는 정해져 있고 요청이 많은 경우 connection이 모두 사용중이라면 반납될때까지 대기를 한다
 - connection 수가 적으면 안되지만 많이 늘리게 되면 메모리를 많이 사용하게 되어 성능을 저하 시킬수 있다
 - 이용자 수에 따라 connection 수를 적절하게 지정해야 한다
 - 사용자 요청수가 적고 동시 접속이 거의없는 경우에는 매 쿼리마다 connection을 빠르게 맺고 끊것이 오히려 성능상 이점이다
 
-3. Thread Pool 
+>#### 3. Thread Pool 
 - 컴퓨터 프로그래밍에서 Thread Pool은 컴퓨터 프로그램에서 실행의 동시성을 달성하기 위한 소프트웨어 설계 패턴이다 (복제된 작업자, 스크루 모델이라고도 불림)
 - 사용 가능한 Thread 수는 실행 완료 후 병렬 작업 대기열과 같이 프로그램에서 사용할수 있는 컴퓨팅 리소스에 맞춰 조정된다
 - MySQL 은 Foreground Thread 를 미리 생성하여 대기시켜 놓는데, 대기하고 있는 Thread 들을 모아둔 곳이 Thread Pool 이다  
@@ -103,17 +107,17 @@ show status like '%thread%';
 
 위에 상태값들을 토대로 Rate를 도출하여 Too many Connection 에 대한 문제 해결법을 찾는다.
 
-1. Cache Miss Rate (캐시 누락률)
+>#### 1. Cache Miss Rate (캐시 누락률)
 ```
 Cache Miss Rate(%) = Threadscreated / Connections x 100
 ```
 - Cache Miss Rate(%)이 높다면 thread_cache_size 를 기본값인 8 보다 높게 설정하는 것을 권장
-2. Connection Miss Rate (연결 누락률)
+>#### 2. Connection Miss Rate (연결 누락률)
 ```
 Connection Miss Rate(%)= Abortedconnects / Connections x 100
 ```
 - Connection Miss Rate(%)이 1% 이상 된다면 wait_timeout 을 좀더 길게 가져가는 것을 권장
-3. Connection Usage (연결 사용률)
+>#### 3. Connection Usage (연결 사용률)
 ```
 Connection Usage(%) = Threads_connected / max_connections x 100
 ```
@@ -123,16 +127,16 @@ Connection Usage(%) = Threads_connected / max_connections x 100
 ### 2.1.1 해결방안
 MySQL 에 접속하여 설정값을 직접 변경하거나 환경설정 파일(my.cnf)에서 변경해주는 방법으로 크게 두가지가 있다.   
 
-1. max_connections 변경
+>#### 1. max_connections 변경
 - mysql.conf 파일의 내용에서 해당 옵션을 적당한 값으로 늘려서 변경한다
-2. wait_timeout 변경
+>#### 2. wait_timeout 변경
 - wait_timeout은 mysqld와 client가 연결을 맺고 다음 쿼리까지 기다리는 최대시간이다
 - wait_timeout 안에 요청이 들어올 경우 0으로 초기화 된다
 - too many connection 을 우회하기 위해선 기본값이 28800초 보다 줄여야 한다. 트래픽이 많을 경우 30초 정도로 적게 하는것이 좋다  
 - 다만 connection 을 전역 변수로 이용하는 경우 wait_timeout 시간이 지나면 재연결을 할수가 없으므로 connection pool 이용을 권장한다  
-3. connection pool 이용시 connection limit 변경
+>#### 3. connection pool 이용시 connection limit 변경
 - max_connections 와 맞게 변경 해준다
-4. interactive_timeout 변경
+>#### 4. interactive_timeout 변경
 - interactive_timeout은 터미널 모드 에서의 다음 쿼리까지 기다리는 최대 시간이다. (wait_timeout 과 비슷)
 - 이것도 또한 wait_timout 과 동일하게 기본값이 28800초 이므로 3600초로 하는것을 권장
 
@@ -140,7 +144,7 @@ MySQL 에 접속하여 설정값을 직접 변경하거나 환경설정 파일(m
 show processlist;
 select * from information_schema.processlist where command != 'sleep';
 ```
-해당 사항을 체크후 변경한 후에 processlist 를 확인한다
+해당 사항을 체크후 변경한 후에 processlist 를 확인한다.  
 
 ## 2.2. Error: Host 'xxx.xx.x.x' is blocked because of many connection errors; unblock with 'mysqladmin flush-hosts'
 
@@ -173,7 +177,7 @@ MySQL 메뉴얼에 따르면 아래와 같이 권장한다.
 4. max_connect_errors를 매우 높게 설정한다 (ex value: 99999999)
 - 이렇게 하면 네트워크 또는 클라이언트의 문제로 인한 우발적인 커넥션 단절 문제를 피할 수가 있다.  
 
-## 참고문서
+## ◆ 참고문서
 * [스레드가 너무 많으면 성능이 저하되는 이유와 해결 방법](https://www.codeguru.com/cplusplus/why-too-many-threads-hurts-performance-and-what-to-do-about-it/)
 * [Thread Pools](https://parkcheolu.tistory.com/30)
 * [thread_pool_size, thread_pool_oversubscribe](https://runebook.dev/ko/docs/mariadb/thread-pool-system-and-status-variables/index)
