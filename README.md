@@ -38,13 +38,38 @@ Process 가 종료되지 않고 계속 실행되며 Background Thread 는 Main T
 - 이러한 Thread 도 매 연결마다 생성하면 부담이 크므로 Tread Pool 개념을 사용한다
 - 실제 동시접속이 늘었을때 Thread 생성으로 인해 지연이 발생할수 있다
 
-2. Thread Pool  
+2. Connection Pool
+- 소프트웨어 엔지니어링에서 Connection Pool은 데이터베이스에 대한 향후 요청이 필요할때 연결을 재사용할 수 있도록 유지관리하는 데이터베이스 연결의 캐시다
+- Connection Pool은 데이터베이스에서 명령을 실행하는 성능을 향상시키는데 사용된다
+- 각 사용자에 대한 데이터베이스 연결, 동적 데이터베이스 기반 웹사이트에 대한 요청 비용은 많이 들고 자원을 낭비한다
+- Coonection pooling에서는 연결이 생성된후 pool에 배치하고 다시 사용되므로 새 연결을 설정할 필요가 없다
+- 모든 Connection을 사용하는 경우 새 연결이 만들어지고 pool에 추가된다
+- 데이터베이스에 대한 연결을 설정하기 위해 사용자가 기다려야 하는 시간을 
+
+3. Thread Pool 
+- 컴퓨터 프로그래밍에서 Thread Pool은 컴퓨터 프로그램에서 실행의 동시성을 달성하기 위한 소프트웨어 설계 패턴이다 (복제된 작업자, 스크루 모델이라고도 불림)
+- 사용 가능한 Thread 수는 실행 완료 후 병렬 작업 대기열과 같이 프로그램에서 사용할수 있는 컴퓨팅 리소스에 맞춰 조정된다
 - MySQL 은 Foreground Thread 를 미리 생성하여 대기시켜 놓는데, 대기하고 있는 Thread 들을 모아둔 곳이 Thread Pool 이다  
 - 최소한 서버에 접속된 클라이언트 수만큼 존재해야 한다
 - 사용자가 DB Connection 을 종료하면 해당 Thread는 Thread Pool로 돌아간다
 - 작업은 내부적으로 Queue에 저장되며(Thread 작업 할당) 새로운 작업이 들어올때마다 저장된 작업을 수행한다. 작업이 할당되지 않은 Thread는 대기상태로 유지된다
 - 예를 들어 Thread Pool의 Thread 최대 갯수가 10 이면 갑자기 요청이 100이 올경우 처음 10개의 요청에 대해서는 Thread를 배정하고 나머지는 Queue에 넣어 대기시킨다 
+- Connection(Thread)를 미리 생성해놓고 재사용하면서 DB 트랜젝션을 관리하여 부하를 줄이고 Connection pool의 개념에서 부하를 관리할 수있게 좀 더 나아간 버전이다
+- 참고할 옵션으로는 thread_pool_size, thread_cache_size 
 
+## 1.1.3 Application (Nodejs)
+Nodesjs 에서 애플리케이션 시작시 Connection 을 5개 생성하여 Connection Pool을 구성한다고 가정할 경우  
+1. 애플리케이션이 시작되고 5개의 Connection 생성
+2. 각 Connection은 TCP/IP 3-way-handshake 과정을 거치고 Nodejs의 Socket은 각각 서로 다른 고유한 포트번호에 할당된다
+3. 연결은 유지되며 즉 5개의 서로 다른 Socket이 열려있다
+4. 이후 이미 형성된 Connection(Socekt) 을 Pool의 Queue 에서 재사용된다
+
+## 1.2 Thread Pool 사용의 이점
+
+- Handshake 비용을 절감
+- Process 또는 Thread 생성 및 삭제 비용의 절감
+- Connection Pool 을 이용해 리소스 절감
+- 
 # 2. 자주 볼수 있는 에러
 ## 2.1. Too many Connections
 
@@ -142,7 +167,5 @@ MySQL 메뉴얼에 따르면 아래와 같이 권장한다.
 * [thread_pool_size, thread_pool_oversubscribe](https://runebook.dev/ko/docs/mariadb/thread-pool-system-and-status-variables/index)
 * [하드웨어 스레드와 소프트웨어 스레드](https://juneyr.dev/thread)
 * [멀티코어 프로그래밍에서 흔히 발생하는 문제 1부](https://andromedarabbit.net/멀티코어-프로그래밍에서-흔히-발생하는-문제-1부/)
-<!-- * Atom(<https://atom.io/>)
-* Visual Studio Code(<https://code.visualstudio.com/>)
-* Notepad++(<https://notepad-plus-plus.org/>) -->
-
+* [내가 만든 서비스는 얼마나 많은 사용자가 이용할 수 있을까?](https://hyuntaeknote.tistory.com/12)
+* [MySQL 8.0 Reference Manual > 5.6.3.4 Thread Pool Tuning](https://dev.mysql.com/doc/refman/8.0/en/thread-pool-tuning.html)
