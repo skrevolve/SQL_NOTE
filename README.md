@@ -75,8 +75,8 @@ Nodesjs 에서 애플리케이션 시작시 Connection 을 5개 생성하여 Con
 
 ## 2.1. Error: Too many Connections
 
-MySQL 에 허용 동시 접속자수가 다차서 더이상 접속할 수없다는 에러이다.  
-아래 설명 글에 따라 해결 방법을 모색해보자  
+MySQL 에 허용 동시 접속자수가 다차서 더이상 접속할 수없다는 에러이다  
+현재 설정되어있는 환경변수 값을 확인하여 문제점을 파악해고 해결 할수 있다  
 
 ```sql
 show variables like "%max_connections%";
