@@ -172,14 +172,16 @@ MySQL 메뉴얼에 따르면 아래와 같이 권장한다.
 - 만일 네트워크가 안정하지 못할 경우, max_connect_errors가 빠른 시간안에 10(default value)에 도달하게 되고 동일 클라이언트의 향후 커넥션을 거부하게 된다.  
 
 따라서 이러한 문제를 해결 하기 위한 방법을 아래와 같이 제안한다.  
+```
 1. 절대로 외부에서 MySQL 서버에 커넥션을 하도록 만들지 말 것
 2. MySQL 에서 libwrap를 지원하도록 활성화 시키지 말 것. 이것을 활성화 시키는 것은 단지 문제를 더 어렵게 하는 것이다.
 3. 사용자의 my.cnf 파일에서 skip_name_resolve를 활성화 시킬 것. 이렇게 하면 모든 호스트 이름에서 점(period)를 비활성화(disable) 시킨다.  
 - 모든 ALL GRANT는 반드시 IP주소를 기반으로 되어 있어야 한다.
 4. max_connect_errors를 매우 높게 설정한다 (ex value: 99999999)
-- 이렇게 하면 네트워크 또는 클라이언트의 문제로 인한 우발적인 커넥션 단절 문제를 피할 수가 있다.  
+- 이렇게 하면 네트워크 또는 클라이언트의 문제로 인한 우발적인 커넥션 단절 문제를 피할 수가 있다. 
+```
 
-## ◆ 참고문서
+#### ◆ 참고문서
 * [스레드가 너무 많으면 성능이 저하되는 이유와 해결 방법](https://www.codeguru.com/cplusplus/why-too-many-threads-hurts-performance-and-what-to-do-about-it/)
 * [Thread Pools](https://parkcheolu.tistory.com/30)
 * [thread_pool_size, thread_pool_oversubscribe](https://runebook.dev/ko/docs/mariadb/thread-pool-system-and-status-variables/index)
