@@ -1,6 +1,6 @@
 # Redis cluster 구성
 
-Amazon Elastic Cache 를 사용해서 cluster를 구성하는 경우 아래 설정이 필요없습니다
+Amazon Elastic Cache 를 사용해서 cluster를 구성하는 경우 설정이 따로 필요없습니다.
 
 ```
 필요한 서버 3대: Ubuntu 20.04 LTS
@@ -12,7 +12,9 @@ cluster 구성시 cluster bus가 통신하는 포트는 각 node 포트 + 10000�
 총 7000, 7001, 17000, 17001번 포트의 방화벽을 해제해야 한다.
 - cluster bus: 장애감지, 구성 업데이트, fail over 승인 등에 사용
 
-## 1. Redis 설치 (설치 후 redis-server 명령어를 입력했을때 서버가 잘 뜬다면 설치 완료)
+## 1. Redis 설치
+
+- 설치 후 redis-server 명령어를 입력했을때 서버가 잘 뜬다면 설치 완료
 
 >### 1.1. wget case
 ```sh
@@ -48,7 +50,7 @@ sudo sysctl -a | grep somaxconn
 ```
 
 >### 1.4. Direcotry 구조
-/opt/redis 디렉토리를 생성하여 redis 설치 디렉토리의 redis.conf 파일을 /opt/redis에 복사
+/opt/redis 디렉토리를 생성하여 redis 설치 디렉토리의 redis.conf 파일을 /opt/redis에 복사.
 redis 설치 디렉토리를 그대로 입력했다면 redis-stable일 것이다.
 /opt/redis 아래에 7000이라는 폴더를 생성한다 (/opt/redis/7000)
 
