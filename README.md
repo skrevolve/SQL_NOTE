@@ -70,12 +70,12 @@ Process가 종료되지 않고 계속 실행되며 Background Thread는 Main Thr
 
 ## 1.1.3 Application (Nodejs)
 Nodesjs 에서 애플리케이션 시작시 Connection 을 5개 생성하여 Connection Pool을 구성한다고 가정할 경우  
-'''
+```
 1. 애플리케이션이 시작되고 5개의 Connection 생성
 2. 각 Connection은 TCP/IP 3-way-handshake 과정을 거치고 Nodejs의 Socket은 각각 서로 다른 고유한 포트번호에 할당된다
 3. 연결은 유지되며 즉 5개의 서로 다른 Socket이 열려있다
 4. 이후 이미 형성된 Connection(Socekt) 을 Pool의 Queue 에서 재사용된다
-'''  
+```  
   
 # 2. 흔히 접할만한 Mysql 에러들과 해결법
 
