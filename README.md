@@ -38,7 +38,7 @@ Process 가 종료되지 않고 계속 실행되며 Background Thread 는 Main T
 - 이러한 Thread 도 매 연결마다 생성하면 부담이 크므로 Tread Pool 개념을 사용한다
 - 실제 동시접속이 늘었을때 Thread 생성으로 인해 지연이 발생할수 있다
 
-2. Connection Pool
+2. Connection Pool  
 ![image](https://user-images.githubusercontent.com/41939976/218619108-c5ffd9ef-6e15-4a01-ba94-10c28c9ee693.png)
 - 소프트웨어 엔지니어링에서 Connection Pool은 데이터베이스에 대한 향후 요청이 필요할때 연결을 재사용할 수 있도록 유지관리하는 데이터베이스 연결의 캐시다
 - Connection Pool은 데이터베이스에서 명령을 실행하는 성능을 향상시키는데 사용된다
