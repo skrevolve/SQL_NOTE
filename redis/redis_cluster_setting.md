@@ -8,8 +8,8 @@ Amazon Elastic Cache 를 사용해서 cluster를 구성하는 경우 설정이 �
 각 서버 slave node(:7001) 1개
 ```
 
-cluster 구성시 cluster bus가 통신하는 포트는 각 node 포트 + 10000번이기 때문에
-총 7000, 7001, 17000, 17001번 포트의 방화벽을 해제해야 한다.
+cluster 구성시 cluster bus가 통신하는 포트는 각 node 포트 + 10000번이기 때문에<br>
+총 7000, 7001, 17000, 17001번 포트의 방화벽을 해제해야 한다.<br>
 - cluster bus: 장애감지, 구성 업데이트, fail over 승인 등에 사용
 
 ## 1. Redis 설치
