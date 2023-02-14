@@ -122,9 +122,10 @@ Connection Usage(%) = Threads_connected / max_connections x 100
 2. wait_timeout 변경
 - wait_timeout은 mysqld와 client가 연결을 맺고 다음 쿼리까지 기다리는 최대시간이다
 - wait_timeout 안에 요청이 들어올 경우 0으로 초기화 된다
-- too many connection 을 우회하기 위해선 기본값이 28800초 보다 줄여야 한다. 트래픽이 많을 경우 30초 정도로 적게 하는것이 좋다
+- too many connection 을 우회하기 위해선 기본값이 28800초 보다 줄여야 한다. 트래픽이 많을 경우 30초 정도로 적게 하는것이 좋다  
+- 다만 connection 을 전역 변수로 이용하는 경우 wait_timeout 시간이 지나면 재연결을 할수가 없으므로 connection pool 이용을 권장한다  
 3. connection pool 이용시 connection limit 변경
-- mac_connections 와 맞게 변경 해준다
+- max_connections 와 맞게 변경 해준다
 4. interactive_timeout 변경
 - interactive_timeout은 터미널 모드 에서의 다음 쿼리까지 기다리는 최대 시간이다. (wait_timeout 과 비슷)
 - 이것도 또한 wait_timout 과 동일하게 기본값이 28800초 이므로 3600초로 하는것을 권장
