@@ -27,7 +27,23 @@ DBMS 와의 통신은 TCP/IP로 이루어지는데 3-way-handshake 과정을 거
 ## 1.1.3. MySQL DBMS
 MySQL은 단일 프로세스, 멀티 스레드 개념이다  
 오라클과 달리 클라이언트를 담당할 Process가 아닌 Thread가 존재한다.  
+MySQL 서버로 요청이 들어올때 마다 배정되는 Foregorund Thread 도 있고 계속 돌고 있는 Background Thread 도 있다.  
+갑자기 요청이 천개가 들어왔다고 가정 하에 Thread 가 그 수만큼 늘어나게 되면 Context Swtiching 관련 리소스가 커져서 시스템 성능이 저하된다.  
+따라서 Multi Thread 프로그램들은  Thread Pool을 이용해서 Thread의 수를 제한한다.  
 
+1. Foreground Thread  
+Background Thread 와는 다르게 기본적인 차이점은 Foregroun Thread 는 메인 Thread가 종료 되더라도 Foreground Thread 가 살아 있는 한  
+Process 가 종료되지 않고 계속 실행되며 Background Thread 는 Main Thread 가 종료되면 바로  Process 를 종료한다  
+- 이 Thread 는 사용자가 요청한 쿼리문장을 처리하는 역할을 한다
+- 이러한 Thread 도 매 연결마다 생성하면 부담이 크므로 Tread Pool 개념을 사용한다
+- 실제 동시접속이 늘었을때 Thread 생성으로 인해 지연이 발생할수 있다
+
+2. Thread Pool  
+- MySQL 은 Foreground Thread 를 미리 생성하여 대기시켜 놓는데, 대기하고 있는 Thread 들을 모아둔 곳이 Thread Pool 이다  
+- 최소한 서버에 접속된 클라이언트 수만큼 존재해야 한다
+- 사용자가 DB Connection 을 종료하면 해당 Thread는 Thread Pool로 돌아간다
+- 작업은 내부적으로 Queue에 저장되며(Thread 작업 할당) 새로운 작업이 들어올때마다 저장된 작업을 수행한다. 작업이 할당되지 않은 Thread는 대기상태로 유지된다
+- 예를 들어 Thread Pool의 Thread 최대 갯수가 10 이면 갑자기 요청이 100이 올경우 처음 10개의 요청에 대해서는 Thread를 배정하고 나머지는 Queue에 넣어 대기시킨다 
 
 # 2. 자주 볼수 있는 에러
 ## 2.1. Too many Connections
@@ -118,4 +134,15 @@ MySQL 메뉴얼에 따르면 아래와 같이 권장한다.
 3. 사용자의 my.cnf 파일에서 skip_name_resolve를 활성화 시킬 것. 이렇게 하면 모든 호스트 이름에서 점(period)를 비활성화(disable) 시킨다.  
 - 모든 ALL GRANT는 반드시 IP주소를 기반으로 되어 있어야 한다.
 4. max_connect_errors를 매우 높게 설정한다 (ex value: 99999999)
-- 이렇게 하면 네트워크 또는 클라이언트의 문제로 인한 우발적인 커넥션 단절 문제를 피할 수가 있다.
+- 이렇게 하면 네트워크 또는 클라이언트의 문제로 인한 우발적인 커넥션 단절 문제를 피할 수가 있다.  
+
+## 참고문서
+* [스레드가 너무 많으면 성능이 저하되는 이유와 해결 방법](https://www.codeguru.com/cplusplus/why-too-many-threads-hurts-performance-and-what-to-do-about-it/)
+* [Thread Pools](https://parkcheolu.tistory.com/30)
+* [thread_pool_size, thread_pool_oversubscribe](https://runebook.dev/ko/docs/mariadb/thread-pool-system-and-status-variables/index)
+* [하드웨어 스레드와 소프트웨어 스레드](https://juneyr.dev/thread)
+* [멀티코어 프로그래밍에서 흔히 발생하는 문제 1부](https://andromedarabbit.net/멀티코어-프로그래밍에서-흔히-발생하는-문제-1부/)
+<!-- * Atom(<https://atom.io/>)
+* Visual Studio Code(<https://code.visualstudio.com/>)
+* Notepad++(<https://notepad-plus-plus.org/>) -->
+
