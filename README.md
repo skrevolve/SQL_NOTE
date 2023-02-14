@@ -71,8 +71,10 @@ Nodesjs 에서 애플리케이션 시작시 Connection 을 5개 생성하여 Con
 3. 연결은 유지되며 즉 5개의 서로 다른 Socket이 열려있다
 4. 이후 이미 형성된 Connection(Socekt) 을 Pool의 Queue 에서 재사용된다
 
-# 2. 흔히 접할만한 Mysql Errors
+# 2. 흔히 접할만한 Mysql 에러들과 
 ## 2.1. Error: Too many Connections
+
+MySQL 에 허용 동시 접속자수가 다차서 더이상 접속할 수없다는 에러이다
 
 ```sql
 show variables like "%max_connections%";
@@ -117,6 +119,8 @@ Connection Usage(%) = Threads_connected / max_connections x 100
 - connection 수가 부족할 경우 Too many connections 에러가 발생한다
 
 ### 2.1.1 해결방안
+MySQL 에 접속하여 설정값을 직접 변경하거나 환경설정 파일(my.cnf)에서 변경해주는 방법으로 크게 두가지가 있다.   
+
 1. max_connections 변경
 - mysql.conf 파일의 내용에서 해당 옵션을 적당한 값으로 늘려서 변경한다
 2. wait_timeout 변경
