@@ -103,22 +103,22 @@ show status like '%thread%';
 
 위에 상태값들을 토대로 Rate를 도출하여 Too many Connection 에 대한 문제 해결법을 찾는다.
 
-1. Cache Miss Rate
+1. Cache Miss Rate (캐시 누락률)
 ```
 Cache Miss Rate(%) = Threadscreated / Connections x 100
 ```
-- Cache Miss Rate(%) 이 높다면 thread_cache_size 를 기본값인 8 보다 높게 설정하는 것을 권장
-2. Connection Miss Rate
+- Cache Miss Rate(%)이 높다면 thread_cache_size 를 기본값인 8 보다 높게 설정하는 것을 권장
+2. Connection Miss Rate (연결 누락률)
 ```
 Connection Miss Rate(%)= Abortedconnects / Connections x 100
 ```
-- Connection Miss Rate(%) 이 1% 이상 된다면 wait_timeout 을 좀더 길게 가져가는 것을 권장
-3. Connection Usage
+- Connection Miss Rate(%)이 1% 이상 된다면 wait_timeout 을 좀더 길게 가져가는 것을 권장
+3. Connection Usage (연결 사용률)
 ```
 Connection Usage(%) = Threads_connected / max_connections x 100
 ```
-- Connection Usage 가 100% 이거나 높다면 max_connections 수를 증가시키는 것을 권장
-- connection 수가 부족할 경우 Too many connections 에러가 발생한다
+- Connection Usage(%)가 100% 이거나 높다면 max_connections 수를 증가시키는 것을 권장
+- 근본적으로 connection 수가 부족할 경우 Too many connections 에러가 발생한다
 
 ### 2.1.1 해결방안
 MySQL 에 접속하여 설정값을 직접 변경하거나 환경설정 파일(my.cnf)에서 변경해주는 방법으로 크게 두가지가 있다.   
