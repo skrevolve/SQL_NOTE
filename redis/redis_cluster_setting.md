@@ -29,8 +29,10 @@ $ sudo ufw enable
 ```sh
 $ sudo ufw status
 ```
-> ufw: command not found (UFW 미설치 상태)
+> ufw: command not found (UFW 미설치 상태. sudo apt install ufw)
+
 > Status: inactive (UFW 설치가 되어있으나 미구성 상태)
+
 > Status: active (UFW 실행 상태)
 
 - UFW 비활성화
@@ -40,6 +42,20 @@ $ sudo ufw disable
 - UFW 기본값으로 재설정
 ```sh
 $ sudo ufw reset
+```
+- 방화벽 설정 예제
+```sh
+// FTP(21), SSH(22), HTTP(80), HTTPS(443) 허용 및 다른 모든 포트 거부
+// 21, 22 포트는 사내망에서만 접근 가능
+// 443, 80 포트는 Ipv4, Ipv6 모두 접근이 가능
+$ sudo ufw default deny incoming
+$ sudo ufw default allow outgoing
+$ sudo ufw allow from 123.123.123.123/24 to any port 22 proto tcp
+$ sudo ufw allow from 123.123.123.123/24 to any port 21 proto tcp
+$ sudo ufw allow 80/tcp
+$ sudo ufw allow 443/tcp
+$ sudo ufw enable
+$ sudo ufw reload
 ```
 
 ```
@@ -54,25 +70,38 @@ cluster 구성시 cluster bus가 통신하는 포트는 각 node 포트 + 10000�
 
 ## 1. Redis 설치
 
-- 설치 후 redis-server 명령어를 입력했을때 서버가 잘 뜬다면 설치 완료
-
->### 1.1. wget case
-```bash
-wget http://download.redis.io/redis-stable.tar.gz
-tar xvzf redis-stable.tar.gz
-cd redis-stable
-make
-make install
+Redis 버전은 공식 Ubuntu 레포지토리에서 제공되며 일반적으로 사용 가능한 최신 버전보다 훨씬 뒤떨어집니다<br>
+최신 릴리스를 설치하기 위해 커뮤니티에서 신뢰할 수 있는 장기간의 최신 PPA인 chris-lea/redis-server를 사용합니다<br>
+또는 레디스 공식 PPA인 redislabs/redis를 사용합니다!<br>
+<br>
+PPA를 시스템의 소프트웨어 소스에 추가합니다 (ENTER 메시지가 표시되면 누름)
+```sh
+$ sudo add-apt-repository ppa:chris-lea/redis-server
+OR
+$ sudo add-apt-repository ppa:redislabs/redis
+```
+<br>
+패키지 목록을 업데이트한 다음 Redis를 설치합니다
+```sh
+$ sudo apt-get update
+$ sudo apt-get install redis-server -y
+```
+<br>
+부팅시 Redis 실행 설정
+```sh
+$ sudo systemctl enable redis-server.service
 ```
 
->### 1.2. apt package case
-```bash
-sudo apt update
-sudo apt install redis-tools
-sudo apt install redis-server
-server redis-server start 또는 stop
-redis-cli로 연동
+## 2. Redis 구성
+<br>
+Redis 구성 파일을 엽니다
+```sh
+$ sudo vi /etc/redis/redis.conf
 ```
+
+Redis가 수신 대기할 IP주소를 업데이트 합니다<br>
+- 애플리케이션 서버에 Redis를 서
+
 
 >### 1.3. 환경변수 설정
 ```bash
