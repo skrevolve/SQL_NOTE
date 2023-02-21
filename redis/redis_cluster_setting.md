@@ -45,9 +45,10 @@ $ sudo ufw reset
 ```
 - 방화벽 설정 예제
 ```sh
-// FTP(21), SSH(22), HTTP(80), HTTPS(443) 허용 및 다른 모든 포트 거부
-// 21, 22 포트는 사내망에서만 접근 가능
-// 443, 80 포트는 Ipv4, Ipv6 모두 접근이 가능
+# FTP(21), SSH(22), HTTP(80), HTTPS(443) 허용 및 다른 모든 포트 거부
+# 21, 22 포트는 사내망에서만 접근 가능
+# 443, 80 포트는 Ipv4, Ipv6 모두 접근이 가능
+
 $ sudo ufw default deny incoming
 $ sudo ufw default allow outgoing
 $ sudo ufw allow from 123.123.123.123/24 to any port 22 proto tcp
@@ -68,7 +69,7 @@ cluster 구성시 cluster bus가 통신하는 포트는 각 node 포트 + 10000�
 총 7000, 7001, 17000, 17001번 포트의 방화벽을 해제해야 한다.<br>
 - cluster bus: 장애감지, 구성 업데이트, fail over 승인 등에 사용
 
-## 1. Redis 설치
+## 1. 각 서버마다 Redis 설치
 
 Redis 버전은 공식 Ubuntu 레포지토리에서 제공되며 일반적으로 사용 가능한 최신 버전보다 훨씬 뒤떨어집니다<br>
 최신 릴리스를 설치하기 위해 커뮤니티에서 신뢰할 수 있는 장기간의 최신 PPA인 chris-lea/redis-server를 사용합니다<br>
@@ -80,17 +81,18 @@ $ sudo add-apt-repository ppa:chris-lea/redis-server
 OR
 $ sudo add-apt-repository ppa:redislabs/redis
 ```
-<br>
+
 패키지 목록을 업데이트한 다음 Redis를 설치합니다
 ```sh
 $ sudo apt-get update
 $ sudo apt-get install redis-server -y
 ```
-<br>
+
 부팅시 Redis 실행 설정
 ```sh
 $ sudo systemctl enable redis-server.service
 ```
+
 
 ## 2. Redis 구성
 <br>
